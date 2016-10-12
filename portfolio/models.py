@@ -7,30 +7,17 @@ from adminsortable.models import Sortable
 
 from sorl.thumbnail import ImageField
 
-
-class TimeStampedModel(models.Model):
-    """
-    An abstract base class model that provides self-managed "created" and
-    "modified" fields, borrowed from django_extensions.
-    """
-    created = models.DateTimeField(_('created'), auto_now_add=True)
-    modified = models.DateTimeField(_('modified'), auto_now=True)
-
-    class Meta:
-        abstract = True
-
-
 class Category(Sortable):
     """ Categorization for works. """
 
     title = models.CharField(_('title'), max_length=255)
-    slug = models.SlugField(_('slug'), unique=True)
+    slug = models.SlugField(_('slug'), unique=True, db_index=True)
 
     class Meta(Sortable.Meta):
         verbose_name = _('category')
         verbose_name_plural = _('categories')
 
-    def __unicode__(self):
+    def __str__(self):
         """ Unicode representation for object. """
         return self.title
 
@@ -47,14 +34,14 @@ class Collection(Sortable):
     """ A collection of artworks. """
 
     title = models.CharField(_('title'), max_length=255)
-    slug = models.SlugField(_('slug'), unique=True)
+    slug = models.SlugField(_('slug'), unique=True, db_index=True)
     description = models.TextField(_('description'), blank=True)
 
     class Meta(Sortable.Meta):
         verbose_name = _('collection')
         verbose_name_plural = _('collections')
 
-    def __unicode__(self):
+    def __str__(self):
         """ Unicode representation for object. """
         return self.title
 
@@ -67,13 +54,16 @@ class Collection(Sortable):
         })
 
 
-class Artwork(Sortable, TimeStampedModel):
+class Artwork(Sortable):
     """ Piece of art. """
 
     collection = models.ForeignKey(Collection, related_name='artworks')
 
     title = models.CharField(_('title'), max_length=255)
     description = models.TextField(_('description'), blank=True)
+    created = models.DateTimeField(_('created'), auto_now_add=True)
+    modified = models.DateTimeField(_('modified'), auto_now=True)
+
 
     categories = models.ManyToManyField(Category,
         related_name='artworks', blank=True
@@ -83,7 +73,7 @@ class Artwork(Sortable, TimeStampedModel):
         verbose_name = _('work')
         verbose_name_plural = _('works')
 
-    def __unicode__(self):
+    def __str__(self):
         """ Unicode representation for object. """
         return self.title
 
@@ -118,11 +108,11 @@ class Picture(Sortable):
         verbose_name = _('picture')
         verbose_name_plural = _('pictures')
 
-    def __unicode__(self):
+    def __str__(self):
         """ Unicode representation for object. """
         title = self.title or self.pk
 
         return _(u"%(artwork)s: %(title)s") % {
-            'artwork': unicode(self.artwork),
+            'artwork': str(self.artwork),
             'title': title
         }

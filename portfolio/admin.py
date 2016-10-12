@@ -25,7 +25,6 @@ class CollectionAdmin(SortableAdmin):
     prepopulated_fields = {"slug": ("title",)}
     inlines = [ArtworkInline]
 
-
 class CategoryAdmin(SortableAdmin):
     model = Category
     prepopulated_fields = {"slug": ("title",)}
@@ -34,7 +33,7 @@ class CategoryAdmin(SortableAdmin):
 class PictureInline(AdminImageMixin, SortableStackedInline):
     model = Picture
     extra = 1
-
+    list_select_related = ['artwork']
 
 class ArtworkAdmin(SortableAdmin):
     model = Artwork
@@ -46,6 +45,8 @@ class ArtworkAdmin(SortableAdmin):
     list_filter = ('collection', 'categories', 'created', 'modified')
     search_fields = ('title', 'collection__title', 'categories__title')
     readonly_fields = ('created', 'modified')
+
+    list_select_related = ['collection']
 
     def thumbnail(self, obj):
         thumbnail_format = '100x100'
@@ -63,7 +64,6 @@ class ArtworkAdmin(SortableAdmin):
                 logger.error('Admin list thumbnail failed.', exc_info=sys.exc_info())
         return ''
     thumbnail.allow_tags = True
-
 
 admin.site.register(Collection, CollectionAdmin)
 admin.site.register(Category, CategoryAdmin)
